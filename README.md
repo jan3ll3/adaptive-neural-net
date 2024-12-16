@@ -1,71 +1,70 @@
 # Adaptive Neural Network with Dynamic Topology
 
-This repository implements an adaptive neural network architecture that can dynamically adjust its topology during training. It includes implementations for both basic neural networks and transformer-based language models with adaptive capabilities.
+This repository implements an adaptive neural network architecture capable of dynamically adjusting its topology (e.g., neurons, layers, attention heads) during training. It supports both basic neural network architectures and transformer-based language models, including selective pruning, weight quantization, and adaptive growth of network components.
 
-## Features
+## Key Features
 
-- **Dynamic Topology**: Networks can grow or shrink based on training needs
-- **Adaptive Attention**: Transformer models with prunable attention heads
-- **Quantization**: Weight quantization for reduced memory footprint
-- **Pruning**: Automatic pruning of inactive neurons and connections
-- **Visualization**: Tools for visualizing network structure and learned patterns
+- **Dynamic Topology**: Networks can grow or shrink based on training conditions:
+  - **Neural MLPs**: Add or remove neurons and layers.
+  - **Transformers**: Prune or reintroduce attention heads, consider layer size growth.
+- **Adaptive Attention (Transformers)**: Heads are pruned based on importance metrics and can be masked out or reactivated.
+- **Weight Quantization**: Periodic quantization reduces memory footprint and may improve inference speed.
+- **Pruning**: Inactive neurons, attention heads, and low-magnitude connections are removed to streamline the model.
+- **Visualization Tools**: Visualize network structure, learned patterns, latent spaces (for VAE), and attention distributions.
 
-## Components
+## Repository Structure
 
-### Core Neural Network (`neural_network.py`)
-- Base implementation of adaptive neural network
-- Support for skip connections
-- Dynamic layer growth and pruning
-- Weight quantization
+- **Core Neural Network** (`neural_network.py`):  
+  Implements an adaptive feedforward network (e.g., for parity or MNIST).  
+  Features:
+  - Custom initialization inspired by XOR detection for parity tasks.
+  - Dynamic neuron growth triggered by activation patterns.
+  - Pruning of low-importance weights and neurons.
+  - Optional weight quantization to reduce precision.
+  - Support for skip connections.
+  
+- **Language Model** (`neural_network_LLM.py`):  
+  Implements a transformer-based language model with adaptive capabilities.  
+  Features:
+  - Multi-head self-attention with pruning of less important heads.
+  - Growth considerations for hidden states if high variance is detected.
+  - Integrates positional embeddings and feed-forward networks with dynamic capacity.
+  - Compatible with GPT-2 style tokenizers.
+  
+- **VAE for MNIST** (`vae.py`):  
+  A Variational Autoencoder with adaptive channel and latent dimension adjustments.  
+  Features:
+  - Convolutional layers that can grow or prune channels based on activation patterns.
+  - Adaptive latent space dimensionality and structure.
+  - Quantization and pruning to maintain efficiency.
+  - Visualization of generated digits, latent space interpolation, and channel activity.
 
-### Language Model (`neural_network_LLM.py`)
-- Transformer-based architecture with adaptive topology
-- Dynamic attention head pruning
-- Adaptive layer growth based on activation patterns
-- Compatible with GPT2 tokenizer
+- **Examples and Training Scripts**:
+  - **MNIST** (`mnist_example.py`):  
+    Simple digit classification showcasing adaptive network growth and pruning.
+    
+  - **Parity** (`parity_example.py`):  
+    N-bit parity problem with XOR-inspired initialization to demonstrate the adaptive MLP.
+    
+  - **Language Model Training** (`train_llm.py`):  
+    Train a transformer-based language model on a text dataset (e.g., BabyLM). Integrates adaptive attention and layer growth.
+    
+  - **VAE Training**:  
+    Run `python vae.py` to train the adaptive VAE on MNIST and visualize outputs.
+  
+- **Visualization Tools**:
+  - **Network Topology** (`visualize_model.py`):  
+    Visualize the network’s layer structure and pruning/growth events.
+    
+  - **MNIST Pattern Visualization** (`visualize_mnist.py`):  
+    Display learned features and outputs from the MLP or VAE.
+    
+  - **VAE Latent Space Visualization** (within `vae.py`):  
+    Generate latent space plots, sample generations, and interpolations.
 
-### Training Examples
-- **MNIST** (`mnist_example.py`): Handwritten digit classification
-- **Parity** (`parity_example.py`): N-bit parity problem
-- **Language Model** (`train_llm.py`): Text generation with BabyLM dataset
-
-### MNIST VAE Generator (`vae.py`)
-- Variational Autoencoder with adaptive topology
-- Features:
-  - Dynamic convolutional layer growth
-  - Adaptive latent space dimensionality
-  - Automatic pruning of inactive channels
-  - Weight quantization for efficiency
-- Capabilities:
-  - Generate new MNIST-like digits
-  - Interpolate between digits in latent space
-  - Visualize learned digit patterns
-  - Analyze latent space structure
-- Training:
-  ```bash
-  python vae.py
-  ```
-- Generated outputs:
-  - `vae_samples_epoch_*.png`: Generated samples per epoch
-  - `interpolation_*to*.png`: Digit interpolations
-  - `latent_space.png`: 2D visualization of latent space
-- Parameters:
-  - Latent dimension: 16
-  - Initial channels: [32, 64, 64]
-  - Growth threshold: 0.5
-  - Prune threshold: 0.05
-  - Batch size: 128
-  - Learning rate: 1e-3
-
-### Visualization Tools
-- Network topology visualization (`visualize_model.py`)
-- MNIST pattern visualization (`visualize_mnist.py`)
-- VAE latent space visualization (`vae.py`)
-
-### Interactive Interface
-- Chat interface for language models (`chat.py`)
-- Real-time temperature adjustment
-- Interactive text generation
+- **Interactive Interface** (`chat.py`):
+  - Provides a command-line chat interface to interact with trained language models.
+  - Adjustable generation parameters such as temperature, top-k, and nucleus sampling.
 
 ## Installation
 
@@ -81,17 +80,20 @@ pip install torch torchvision transformers rich wandb
 ## Quick Start
 
 ### Training a Basic Network
+
+Train an adaptive MLP on MNIST or parity tasks:
+
 ```bash
 # Train on MNIST
 python mnist_example.py
 
-# Train on parity problem
+# Train on an N-bit parity problem
 python parity_example.py
 ```
 
 ### Training a Language Model
+
 ```bash
-# Train on text data
 python train_llm.py --data_dir path/to/data \
     --hidden_size 256 \
     --num_layers 6 \
@@ -101,111 +103,106 @@ python train_llm.py --data_dir path/to/data \
 ```
 
 ### Using the Chat Interface
+
+After training a language model:
+
 ```bash
-# Chat with trained language model
 python chat.py --model_path outputs/best_model.pt
 ```
 
-## Model Architecture
+Interactively generate text and adjust parameters such as temperature.
 
-### Adaptive Neural Network
-- Dynamic layer sizing based on training needs
-- Skip connection management
-- Pruning of inactive neurons
-- Weight quantization for efficiency
+## Adaptive Mechanisms
 
-### Adaptive Transformer
-- Base transformer architecture with:
-  - Multi-head self-attention
-  - Position embeddings
-  - Layer normalization
-  - Feed-forward networks
-- Adaptive features:
-  - Dynamic head pruning
-  - Layer growth based on activation patterns
-  - Attention pattern analysis
+### Growth and Pruning
 
-### Adaptive VAE
-- Convolutional architecture:
-  - Encoder: Conv2d layers with increasing channels
-  - Decoder: ConvTranspose2d layers with decreasing channels
-  - Adaptive channel growth based on activation patterns
-- Latent space features:
-  - Dynamic dimensionality adjustment
-  - Automatic structure discovery
-  - KL divergence balancing
-- Adaptive mechanisms:
-  - Channel pruning based on activation statistics
-  - Layer growth triggered by high variance
-  - Weight quantization for memory efficiency
-  - Stability-aware growth with cooldown periods
-- Visualization capabilities:
-  - Generated samples tracking
-  - Latent space interpolation
-  - t-SNE visualization of digit clusters
-  - Channel activation analysis
+**Neural MLPs:**
+
+- **Neuron Growth:**  
+  If layer activations are consistently saturated (e.g., >90% are active), the network adds new neurons to handle complexity.
+  
+- **Weight and Neuron Pruning:**  
+  Periodically remove weights with magnitudes below a threshold. Inactive neurons (no strong connections) are pruned to reduce overparameterization.
+
+**Transformers:**
+
+- **Attention Head Pruning:**  
+  Heads are pruned if their importance (based on weight norms) falls below a certain ratio of the maximum. Pruned heads are masked out, reducing computation and focusing on critical information paths.
+
+- **Potential Layer Growth:**  
+  If activation variance is high and layer sizes are under their maximum limit, hidden dimensions or intermediate projections may grow. This is currently a stubbed feature in the example code and can be extended.
+
+**VAE:**
+
+- **Channel Growth/Pruning:**  
+  Convolutional channels grow if variance is high, and prune if some channels remain inactive. Latent space dimensions can also adapt to complexity.
+
+### Quantization
+
+- **Weight Quantization:**  
+  Every few steps, weights are quantized to reduce memory usage. This can act as a form of regularization and improve inference speed.
+
+### Stability Controls
+
+- **Growth Cooldown:**  
+  After growing, a cooldown period prevents immediate subsequent expansions, allowing the network to stabilize.
+
+- **Activation Statistics:**  
+  Exponential moving averages of mean and variance guide decisions on when to grow layers or prune heads.
+
+### Example Schedules
+
+- **Weight Quantization:** Every 100 steps.
+- **Head Pruning (Transformers):** Every 500 steps.
+- **Growth Checks:** Every 1000 steps, if enough samples have been processed.
+
+These schedules can be customized in the training scripts.
 
 ## Training Parameters
 
-### Language Model
-- Learning rate: 3e-4
-- Batch size: 2-4 (adjustable)
-- Sequence length: 512
-- Hidden size: 256
-- Number of layers: 6
-- Attention heads: 8
+**Language Model (Default):**
+- Learning Rate: 3e-4
+- Batch Size: 2-4
+- Sequence Length: 512
+- Hidden Size: 256
+- Number of Layers: 6
+- Attention Heads: 8
 
-### Optimization
+**Optimization:**
 - AdamW optimizer
-- Cosine learning rate schedule
-- Gradient clipping
-- Weight quantization every 100 steps
-- Pruning every 500 steps
-- Growth check every 1000 steps
+- Cosine LR schedule
+- Gradient clipping for stability
+- Periodic pruning and quantization
+
+**VAE (Default):**
+- Latent dimension: 16
+- Initial channels: [32, 64, 64]
+- Growth threshold: 0.5
+- Prune threshold: 0.05
+- Batch size: 128
+- Learning rate: 1e-3
 
 ## Visualization
 
-The repository includes several visualization tools:
-- Network topology visualization
-- Attention pattern visualization
-- Training progress monitoring
-- Latent space visualization (for VAE)
+- **Topology Visualization:**  
+  Inspect how layers and heads change over time.
+  
+- **Attention Patterns (Transformers):**  
+  Analyze which heads survive pruning and how attention distributions evolve.
+  
+- **VAE Latent Space:**  
+  Visualize digit clusters, interpolations, and emerging structures as channels and latent dimensions adapt.
 
 ## Chat Interface Features
 
-- Interactive command-line interface
-- Adjustable generation parameters:
-  - Temperature (0.1-2.0)
-  - Top-k filtering
-  - Nucleus (top-p) sampling
-- Special commands:
-  - `help`: Show available commands
-  - `temp=X`: Adjust temperature
-  - `quit`: Exit interface
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Citation
-
-If you use this code in your research, please cite:
-
-```bibtex
-@software{adaptiveNN,
-  title = {Adaptive Neural Network with Dynamic Topology},
-  author = {Your Name},
-  year = {2024},
-  url = {https://github.com/yourusername/adaptiveNN}
-}
-```
+- Interactive prompt for language model queries.
+- Adjustable generation parameters (`temp=X` for temperature, `help` for commands).
+- Allows on-the-fly experimentation with pruning and quantization settings if integrated.
 
 ## Acknowledgments
 
-- Thanks to the PyTorch team for the excellent deep learning framework
-- The Hugging Face team for the transformers library
-- The rich library for beautiful console output 
+- PyTorch team for the foundational deep learning framework.
+- Hugging Face team for the Transformers library.
+- The `rich` library for improved console output.
+- The BabyLM project for providing training data for the language model.
+
